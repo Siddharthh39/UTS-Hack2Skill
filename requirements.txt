@@ -1,0 +1,4 @@
+
+reflex==0.7.14
+pandas
+sqlalchemy
