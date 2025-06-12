@@ -7,6 +7,7 @@ from call_management_system.states.auth_state import AuthState
 
 
 class CallData(TypedDict):
+    """Represents the structure of a call record."""
     id: int
     customer_name: str
     phone_number: str
@@ -17,13 +18,14 @@ class CallData(TypedDict):
 
 
 class PieDataEntry(TypedDict):
+    """Represents the structure of data for pie charts."""
     name: str
     value: int
     fill: str
 
 
 class CallState(rx.State):
-    """The state for managing calls."""
+    """The state for managing calls in the application."""
 
     calls: list[CallData] = [
         {
@@ -122,9 +124,8 @@ class CallState(rx.State):
         ]
 
     @rx.var
-    async def agent_call_status_pie_data(
-        self,
-    ) -> list[PieDataEntry]:
+    async def agent_call_status_pie_data(self) -> list[PieDataEntry]:
+        """Generates pie chart data for the logged-in agent's call statuses."""
         auth_state = await self.get_state(AuthState)
         user_email = auth_state.logged_in_user_email
         user_calls = [
@@ -152,9 +153,8 @@ class CallState(rx.State):
         ]
 
     @rx.var
-    def admin_call_status_pie_data(
-        self,
-    ) -> list[PieDataEntry]:
+    def admin_call_status_pie_data(self) -> list[PieDataEntry]:
+        """Generates pie chart data for all call statuses (admin view)."""
         if not self.calls:
             return []
         status_counts = Counter(
@@ -176,6 +176,7 @@ class CallState(rx.State):
 
     @rx.var
     def admin_overall_stats(self) -> dict[str, str | int]:
+        """Calculates overall statistics for admin dashboard."""
         total_calls = len(self.calls)
         if not total_calls:
             return {
@@ -210,9 +211,8 @@ class CallState(rx.State):
         }
 
     @rx.var
-    def admin_agent_stats(
-        self,
-    ) -> dict[str, dict[str, int]]:
+    def admin_agent_stats(self) -> dict[str, dict[str, int]]:
+        """Generates performance statistics for each agent."""
         stats: dict[str, dict[str, int]] = {}
         assigned_calls = [
             c for c in self.calls if c["assigned_to"]
@@ -240,23 +240,25 @@ class CallState(rx.State):
 
     @rx.event
     def toggle_upload_modal(self):
+        """Toggles the visibility of the upload modal."""
         self.show_upload_modal = not self.show_upload_modal
 
     @rx.event
     def toggle_update_modal(self):
+        """Toggles the visibility of the update modal."""
         self.show_update_modal = not self.show_update_modal
         if not self.show_update_modal:
             self.selected_call = None
 
     @rx.event
     def select_call_for_update(self, call: CallData):
+        """Selects a call for updating and opens the update modal."""
         self.selected_call = call
         self.show_update_modal = True
 
     @rx.event
-    async def handle_upload(
-        self, files: list[rx.UploadFile]
-    ):
+    async def handle_upload(self, files: list[rx.UploadFile]):
+        """Handles the upload of a CSV file containing call data."""
         if not files:
             yield rx.toast.error(
                 "No files selected for upload."
@@ -317,6 +319,7 @@ class CallState(rx.State):
 
     @rx.event
     def update_call(self, form_data: dict):
+        """Updates the details of a selected call."""
         call_id = int(form_data.get("id", 0))
         if not call_id:
             return rx.toast.error("Invalid call ID.")
@@ -344,6 +347,7 @@ class CallState(rx.State):
 
     @rx.event
     def download_pivot_table(self):
+        """Generates and downloads a pivot table of call data."""
         if not self.calls:
             return rx.toast.warning("No data to export.")
         df = pd.DataFrame(self.calls)
@@ -368,6 +372,7 @@ class CallState(rx.State):
 
     @rx.event
     def export_data(self):
+        """Exports all call data to a CSV file."""
         if not self.calls:
             return rx.toast.warning("No data to export.")
         df = pd.DataFrame(self.calls)

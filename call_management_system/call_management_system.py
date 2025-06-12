@@ -13,6 +13,7 @@ def index() -> rx.Component:
     )
 
 
+# Initialize the Reflex app with theme and routes.
 app = rx.App(
     theme=rx.theme(appearance="light"),
     head_components=[

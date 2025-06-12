@@ -3,6 +3,7 @@ from typing import TypedDict
 
 
 class User(TypedDict):
+    """Represents a user in the system."""
     password: str
     role: str
 
